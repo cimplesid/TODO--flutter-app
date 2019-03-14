@@ -1,36 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:todo/models/todo_item_model.dart';
 import './details.dart';
+import '../../resources/db_provider.dart';
 
 class Home extends StatefulWidget {
-  
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   bool _value1 = false;
-  bool _value2 = false;
-  void _value1Changed(bool value) => setState(() => _value1 = value);
-  void _value2Changed(bool value) => setState(() => _value2 = value);
+  String content;
+  String deadline;
+  String completed;
 
-  List items = [
-    {
-      "content": "to work",
-      "deadline":"2019-4-4",
-      "completed":"no",
-    },
-    {
-      "content": "to make native app",
-      "deadline":"2019-5-2",
-      "completed":"no",
-    },
-    {
-      "content": "to buy ssd",
-      "deadline":"2019-06-01",
-      "completed":"no",
-    }
-  ];
-    
+  //bool _value2 = false;
+  void _value1Changed(bool value) => setState(() => _value1 = value);
+  //void _value2Changed(bool value) => setState(() => _value2 = value);
+
+  List items = [];
+  void initState() {
+    super.initState();
+  }
+
+  void _delete(TodoModel item) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Delete item"),
+            content: Text("Are you sure ?"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("cancel"),
+                onPressed: () => Navigator.pop(context),
+              ),
+              FlatButton(
+                  child: Text("Delete"),
+                  onPressed: () {
+                    removeItem(item);
+
+                    Navigator.pushReplacement(
+                        context, MaterialPageRoute(builder: (_) => Home()));
+                  }),
+            ],
+          );
+        });
+  }
+
+  Future<List> getItem() async {
+    return DbProvider().fetchItems();
+  }
+
+  removeItem(TodoModel item) {
+    setState(() {
+      DbProvider().deleteItem(item.id);
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -45,35 +72,59 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (BuildContext context, int index) {
-          var item = items[index];
-          return ListTile(
-            onTap: ()=>Navigator.push(context, MaterialPageRoute(
-              builder: (_) => Details(item: item,)
-            )),
-            leading: Checkbox(value: _value1, onChanged: _value1Changed), 
-            title: Text(item["content"]),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(item["deadline"]),
-                SizedBox(height: 5,),
-                Text(item["completed"])
-              ],
-            ),
-          );
-        },
-      ),
+      body: FutureBuilder(
+          future: getItem(),
+          builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+            if (!snapshot.hasData)
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            if (snapshot.hasError)
+              return Center(
+                child: Text("database failed to cnct"),
+              );
+            List items = snapshot.data;
+            return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  TodoModel item = TodoModel.fromMap(items[index]);
 
+                  return ListTile(
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => Details(
+                                  item: item,
+                                  delete: _delete,
+                                ))),
+                    leading:
+                        Checkbox(value: _value1, onChanged: _value1Changed),
+                    title: Text(item.content),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(item.deadline),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(item.completed),
+                       
+                      ],
+                    ),
+                  );
+                  
+                });
+          }),
+          
       floatingActionButton: FloatingActionButton(
-        child:Icon(Icons.add),
-
-      onPressed: (){}),
+          child: Icon(Icons.add),
+          onPressed: () {
+            if (content == null) return;
+            TodoModel item = TodoModel(
+                content: content, deadline: deadline, completed: completed);
+            DbProvider().addItem(item);
+            Navigator.pop(context);
+          }),
     );
-
-     
-  
   }
 }

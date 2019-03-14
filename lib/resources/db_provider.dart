@@ -50,7 +50,7 @@ class DbProvider{
     return res;
   }
 
-  Future<todoModel> fetchItem(int id) async{
+  Future<TodoModel> fetchItem(int id) async{
     var dbClient = await db;
     final maps = await dbClient.query(
       tableName,
@@ -60,13 +60,13 @@ class DbProvider{
     );
 
     if (maps.length > 0){
-      return todoModel.fromMap(maps.first);
+      return TodoModel.fromMap(maps.first);
     }
 
     return null;
   }
 
-  Future<int> addItem(todoModel item) async {
+  Future<int> addItem(TodoModel item) async {
     var dbClient = await db;
     return dbClient.insert(tableName, item.toMap());
   }

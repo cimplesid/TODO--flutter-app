@@ -1,13 +1,13 @@
 import '../resources/constraints.dart';
 
-class todoModel {
+class TodoModel {
   final String content;
   final int id;
  final String deadline;
 
   final String completed;
 
-  todoModel({
+  TodoModel({
     this.content,
     this.id,
    this.deadline,
@@ -15,7 +15,7 @@ class todoModel {
     this.completed,
   });
 
-  todoModel.fromMap(Map<String, dynamic> parsedJson) :
+  TodoModel.fromMap(Map<String, dynamic> parsedJson) :
         id = parsedJson[columnId],
         content = parsedJson[columnContent],
        deadline = parsedJson[columnDeadline],
