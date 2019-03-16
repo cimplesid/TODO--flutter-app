@@ -5,21 +5,25 @@ import 'ui/pages/home.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Todo app',
-       debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-       
-        
-        primarySwatch: Colors.yellow,
-      ),
+          primarySwatch: Colors.lightBlue,
+          appBarTheme: AppBarTheme(
+              color: Colors.deepPurple,
+              iconTheme: IconThemeData(color: Colors.lightBlue),
+              textTheme: TextTheme(
+                title: TextStyle(),
+                
+              ))),
       home: Home(),
     );
   }
 }
+
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => new _SplashScreenState();
@@ -57,4 +61,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-
